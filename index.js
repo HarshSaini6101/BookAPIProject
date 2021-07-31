@@ -5,6 +5,10 @@ const mongoose = require("mongoose");
 
 const database = require("./database/index");
 
+const BookModels = require("./database/Book");
+const authorModels = require("./database/author");
+const publicationModels = require("./database/publication");
+
 const ventures = express();
 
 ventures.use(express.json());
