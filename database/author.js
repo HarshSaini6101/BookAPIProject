@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const AuthorSchema = momngoose.Schema({
+const AuthorSchema = mongoose.Schema({
     id: Number,
     name: String,
     books: [String],

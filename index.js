@@ -5,9 +5,9 @@ const mongoose = require("mongoose");
 
 const database = require("./database/index");
 
-const BookModels = require("./database/Book");
-const authorModels = require("./database/author");
-const publicationModels = require("./database/publication");
+const BookModel = require("./database/Book");
+const authorModel = require("./database/author");
+const publicationModel = require("./database/publication");
 
 const ventures = express();
 
@@ -22,16 +22,15 @@ mongoose.connect(process.env.MONGO_URL,
     })
     .then(() => console.log("connection is ohk"));
 
-ventures.get("/", (req, res) => {
-    return res.json({ books: database.books });
+ventures.get("/", async (req, res) => {
+    const getAllBooks = await BookModel.find();
+    return res.json({ books: getAllBooks });
 });
 
-ventures.get("/is/:isbn", (req, res) => {
-    const getSpecificBook = database.books.filter(
-        (book) => book.ISBN === req.params.isbn
-    );
+ventures.get("/is/:isbn", async (req, res) => {
+    const getSpecificBook = await BookModel.findOne({ ISBN: req.params.isbn });
 
-    if (getSpecificBook.length === 0) {
+    if (!getSpecificBook) {
         return res.json({
             error: `no book found for the ISBN of ${req.params.isbn}`,
         });
@@ -39,12 +38,10 @@ ventures.get("/is/:isbn", (req, res) => {
         return res.json({book: getSpecificBook});
 });
 
-ventures.get("/c/:category", (req, res) => {
-    const getSpecificBooks = database.books.filter(
-        (book) => book.category.includes(req.params.category)
-    );
+ventures.get("/c/:category", async (req, res) => {
+    const getSpecificBooks = await BookModel.findOne({category: req.params.category });
 
-    if(getSpecificBooks.length === 0) {
+    if(!getSpecificBooks) {
         return res.json({
             error: `No book found for the category of ${req.params.category}`,
         });
