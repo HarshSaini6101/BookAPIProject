@@ -1,10 +1,22 @@
+require("dotenv").config();
+
 const express = require("express");
+const mongoose = require("mongoose");
 
 const database = require("./database/index");
 
 const ventures = express();
 
 ventures.use(express.json());
+
+mongoose.connect(process.env.MONGO_URL,
+    {
+    useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false,
+      useCreateIndex: true
+    })
+    .then(() => console.log("connection is ohk"));
 
 ventures.get("/", (req, res) => {
     return res.json({ books: database.books });
