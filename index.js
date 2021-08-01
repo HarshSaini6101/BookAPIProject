@@ -8,6 +8,8 @@ const database = require("./database/index");
 const BookModel = require("./database/Book");
 const authorModel = require("./database/author");
 const publicationModel = require("./database/publication");
+const AuthorModel = require("./database/author");
+const PublicationModel = require("./database/publication");
 
 const ventures = express();
 
@@ -24,7 +26,7 @@ mongoose.connect(process.env.MONGO_URL,
 
 ventures.get("/", async (req, res) => {
     const getAllBooks = await BookModel.find();
-    return res.json({ books: getAllBooks });
+    return res.json({ Books: getAllBooks });
 });
 
 ventures.get("/is/:isbn", async (req, res) => {
@@ -39,7 +41,7 @@ ventures.get("/is/:isbn", async (req, res) => {
 });
 
 ventures.get("/c/:category", async (req, res) => {
-    const getSpecificBooks = await BookModel.findOne({category: req.params.category });
+    const getSpecificBooks = await BookModel.findOne({category: req.params.category, });
 
     if(!getSpecificBooks) {
         return res.json({
@@ -49,16 +51,14 @@ ventures.get("/c/:category", async (req, res) => {
         return res.json({book: getSpecificBooks});
 });
 
-ventures.get("/authors", (req, res) => {
-    return res.json({ authors: database.authors });
+ventures.get("/authors", async (req, res) => {
+    const getAllAuthors = await AuthorModel.find();
+    return res.json({ authors: getAllAuthors });
 });
 
-ventures.get("/authors/:isbn", (req, res) => {
-    const getSpecificAuthors = database.authors.filter(
-        (author) => author.books.includes(req.params.isbn)
-    );
+ventures.get("/authors/:isbn", (req, res) => { AuthorModel.findOne({ ISBN: req.params.isbn });
 
-    if (getSpecificAuthors.length === 0) {
+    if (!getSpecificAuthors) {
         return res.json({
             error: `no author found for the book ${req.params.isbn}`,
         });
@@ -66,17 +66,15 @@ ventures.get("/authors/:isbn", (req, res) => {
     return res.json({author: getSpecificAuthors});
 });
 
-ventures.get("/publications", (req, res) => {
-    return res.json({ publications: database.publications });
+ventures.get("/publications", async (req, res) => {
+    const getAllPublications = await PublicationModel.find();
+    return res.json({ publications: getAllPublications });
 });
 
-ventures.get("/publications", (req, res) => {
-    return res.json({ publications: database.publications });
-});
 
 ventures.get("/publications/:isbn", (req, res) => {
     const getSpecificPublications = database.publications.filter(
-        (publication) => publication.books.includes(req.params.isbn)
+        (publication) => publication.Books.includes(req.params.isbn)
     );
 
     if (getSpecificPublications.length === 0) {
@@ -87,22 +85,24 @@ ventures.get("/publications/:isbn", (req, res) => {
     return res.json({publication: getSpecificPublications});
 });
 
-ventures.post("/book/new", (req, res) => {
+ventures.post("/book/new", async (req, res) => {
     const { newBook } = req.body;
-    database.books.push(newBook);
-    return res.json({ books: database.books, message: "book was added"});
+   
+    BookModel.create(newBook);
+
+    return res.json({  message: "book was added"});
 });
 
-ventures.post("/author/new", (req, res) => {
+ventures.post("/author/new", async (req, res) => {
     const { newAuthor } = req.body;
-    database.authors.push(newAuthor);
-    return res.json({ authors: database.authors, message: "author was added"});
+    AuthorModel.create(newAuthor);
+    return res.json({  message: "author was added"});
 });
 
-ventures.post("/publications/new", (req, res) => {
+ventures.post("/publications/new", async (req, res) => {
     const { newPublication } = req.body;
-    database.publications.push(newPublication);
-    return res.json({ publications: database.publications, message: "publications was added"});
+    PublicationModel.create(newPublication);
+    return res.json({ message: "publications was added"});
 });
 
 ventures.put("/book/update/:isbn", (req, res) => {
