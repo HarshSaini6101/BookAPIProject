@@ -120,20 +120,53 @@ ventures.put("/book/update/:isbn", async (req, res) => {
     return res.json({ books: updatedBook });
 });
 
-ventures.put("/book/author/update/:isbn", (req, res) => {
-database.books.forEach((book) => {
-    if (book.ISBN === req.params.isbn) 
-    return book.authors.push(req.body.newAuthor);
-});
- database.authors.forEach((author) => {
-     if(author.id === req.body.newAuthor) 
-     return author.books.push(req.params.isbn);
- });
- return res.json({books: database.books,
-authors:database.authors,
-message: "new author was added",});
-});
+// ventures.put("/book/author/update/:isbn", (req, res) => {
+// database.books.forEach((book) => {
+//     if (book.ISBN === req.params.isbn) 
+//     return book.authors.push(req.body.newAuthor);
+// });
+//  database.authors.forEach((author) => {
+//      if(author.id === req.body.newAuthor) 
+//      return author.books.push(req.params.isbn);
+//  });
+//  return res.json({books: database.books,
+// authors:database.authors,
+// message: "new author was added",});
+// });
 
+ventures.put("/book/author/update/:isbn", async (req, res) => {
+
+    const updatedBook = await BookModel.findOneAndUpdate({
+    ISBN:    req.params.isbn,
+    },
+    {
+        title: req.body.bookTitle,
+    },
+    {
+        $addToSet: {
+            author: req.body.newAuthor,
+        },
+    },
+    {
+        new: true,
+    });
+
+    const updatedAuthor = await AuthorModel.findOneAndUpdate({
+        id: req.params.isbn,
+    },
+    {
+        $addToSet: {
+            books: req.params.isbn,
+        },
+    },
+    {
+        new: true,
+    });
+
+    return res.json({ books: updatedBook,
+        authors:updatedAuthor,
+        message: "new author was added", });
+});
 
 
 ventures.listen(3000, () => console.log("server is running!!"));
